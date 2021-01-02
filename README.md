@@ -1,7 +1,7 @@
 # note-taker
 ![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)
 
-##Description
+## Description
 
 an application using express.js, for writing notes.
 

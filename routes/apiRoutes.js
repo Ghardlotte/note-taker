@@ -1,29 +1,41 @@
-const router = require("express").Router();
-const store = require("../db/store");
+const fs = require("fs");
+const uuid = require("uuid");
 
-// GET "/api/notes" responds with all notes from the database
-router.get("/notes", function(req, res) {
-  store
-    .getNotes()
-    .then((notes) => {
-        return res.json(notes);
-    })
-    .catch(err => res.status(500).json(err));
-});
+module.exports = (app) => {
+  let noteData = require(__dirname + "/../db/db.json");
 
-router.post("/notes", (req, res) => {
-  store
-    .addNote(req.body)
-    .then((note) => res.json(note))
-    .catch(err => res.status(500).json(err));
-});
+  app.get("/api/notes", (req, res) => {
+    res.json(noteData);
+  });
 
-// DELETE "/api/notes" deletes the note with an id equal to req.params.id
-router.delete("/notes/:id", function(req, res) {
-  store
-    .removeNote(req.params.id)
-    .then(() => res.json({ ok: true }))
-    .catch(err => res.status(500).json(err));
-});
+  app.post("/api/notes", (req, res) => {
+    let newNote = req.body;
+    newNote.id = uuid;
 
-module.exports = router;
+    noteData.push(newNote);
+
+    const rawData = JSON.stringify(noteData);
+
+    fs.writeFile(__dirname + "/../db/db.json", rawData, (err) => {
+      if (err) throw err;
+    });
+    res.end();
+  });
+
+  app.delete("/api/notes/:id", (req, res) => {
+    const noteId = req.params.id;
+
+    let filtered = noteData.filter(function (note) {
+      return note.id != noteId;
+    });
+
+    newNoteData = JSON.stringify(filtered);
+    noteData = filtered;
+
+    fs.writeFileSync(__dirname + "/../db/db.json", newNoteData, (err) => {
+      if (err) throw err;
+    });
+
+    res.end();
+  });
+};
